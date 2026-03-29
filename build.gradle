@@ -1,110 +1,81 @@
-plugins {
-    id 'eclipse'
-    id 'idea'
-    id 'maven-publish'
-    id 'net.neoforged.gradle' version '[6.0,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-    id 'org.spongepowered.mixin' version '0.7.+'
-}
-
-version = "${minecraft_version}-${mod_version}"
-group = mod_group_id
-
-jarJar.enable()
-
-base {
-    archivesName = mod_id
-}
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-
-sourceSets {
-    main {
-        resources {
-            srcDir 'src/generated/resources'
-            exclude '.cache/'
-        }
+buildscript {
+    repositories {
+        maven { url = "https://files.minecraftforge.net/maven" }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+        maven { url = 'https://maven.parchmentmc.org' }
+    }
+    dependencies {
+        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "[6.0,6.2)", changing: true
+        classpath group: "org.spongepowered", name: "mixingradle", version: "0.7-SNAPSHOT"
+        classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
+apply plugin: "net.minecraftforge.gradle"
+apply plugin: "eclipse"
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: "maven-publish"
+apply plugin: "org.spongepowered.mixin"
+
+mixin {
+    add sourceSets.main, "${project.modId}.refmap.json"
+}
+
+version = "${project.minecraft}-${project.modVersion}"
+group = "com.teamabnormals"
+archivesBaseName = project.modId
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
 minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-
-    copyIdeResources = true
-
+    mappings channel: 'parchment', version: '2023.09.03-1.20.1'
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
     runs {
-        configureEach {
-            workingDirectory project.file("run/${it.name}")
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
+        client {
+            workingDirectory project.file("run")
+            property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+            property "forge.logging.console.level", "debug"
+            property "mixin.env.remapRefMap", "true"
+            property "mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg"
+            arg "-mixin.config=" + project.modId + ".mixins.json"
             mods {
-                "${mod_id}" {
+                easel_does_it {
                     source sourceSets.main
                 }
             }
         }
-
-        client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-
-            if (project.hasProperty('mc_uuid')) {
-                args '--uuid', project.getProperty('mc_uuid')
-            }
-            if (project.hasProperty('mc_username')) {
-                args '--username', project.getProperty('mc_username')
-            }
-            if (project.hasProperty('mc_accessToken')) {
-                args '--accessToken', project.getProperty('mc_accessToken')
-            }
-        }
-
         server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
+            workingDirectory project.file("run")
+            property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+            property "forge.logging.console.level", "debug"
+            property "mixin.env.remapRefMap", "true"
+            property "mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg"
+            arg "-mixin.config=" + project.modId + ".mixins.json"
+            mods {
+                easel_does_it {
+                    source sourceSets.main
+                }
+            }
         }
-
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
         data {
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            workingDirectory project.file("run")
+            property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+            property "forge.logging.console.level", "debug"
+            property "mixin.env.remapRefMap", "true"
+            property "mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg"
+            property "blueprint.indev", "true"
+            args "--mod", project.modId, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources"), "--existing-mod", "blueprint"
+            mods {
+                easel_does_it {
+                    source sourceSets.main
+                }
+            }
         }
     }
 }
 
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-
-    config "${mod_id}.mixins.json"
-
-    debug.export = true
-}
-
-repositories {
-    maven {
-        name = 'MinecraftForge'
-        url = 'https://maven.minecraftforge.net/'
-
-        content {
-            includeGroup 'net.minecraftforge'
-        }
-    }
-    maven {
-        url "https://cursemaven.com"
-    }
-    maven {
-        url "https://maven.blamejared.com"
-        content {
-            includeGroup "mezz.jei"
-        }
-    }
-
-    mavenLocal()
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
 }
 
 dependencies {
@@ -139,56 +110,71 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
 }
 
-tasks.withType(ProcessResources).configureEach {
-    var replaceProperties = [
-        minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-        forge_version: forge_version, forge_version_range: forge_version_range,
-        loader_version_range: loader_version_range,
-        mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-        mod_authors: mod_authors, mod_description: mod_description
-    ]
-    inputs.properties replaceProperties
+repositories {
+    maven { url "https://maven.teamabnormals.com/" }
+    maven { url "https://dvs1.progwml6.com/files/maven/" }
+    maven { url "https://modmaven.k-4u.nl" }
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta', "${mod_id}.mixins.json".toString()]) {
-        expand replaceProperties + [project: project]
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        forRepositories(fg.repository) // Only add this if you're using ForgeGradle, otherwise remove this line
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+
+        content {
+            includeGroup 'net.minecraftforge'
+        }
+    }
+    maven {
+        url "https://cursemaven.com"
+    }
+    maven {
+        url "https://maven.blamejared.com"
+        content {
+            includeGroup "mezz.jei"
+        }
+    }
+
+    mavenLocal()
 }
 
-reobf {
-    jarJar { }
-}
-
-tasks.jarJar.finalizedBy('reobfJarJar')
-
-tasks.named('jar', Jar).configure {
+jar {
     manifest {
         attributes([
-                'Specification-Title': mod_id,
-                'Specification-Vendor': mod_authors,
-                'Specification-Version': '1',
-                'Implementation-Title': project.name,
-                'Implementation-Version': mod_version,
-                'Implementation-Vendor': mod_authors,
-                'Implementation-Timestamp': new Date().format('yyyy-MM-dd\'T\'HH:mm:ssZ')
+                "Specification-Title"     : project.modName,
+                "Specification-Vendor"    : "Zap",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.modName,
+                "Implementation-Version"  : project.modVersion,
+                "Implementation-Vendor"   : "Zap",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs"            : project.modId + ".mixins.json"
         ])
     }
-
-    finalizedBy 'reobfJar'
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
 }
 
 publishing {
     publications {
-        register('mavenJava', MavenPublication) {
+        maven(MavenPublication) {
             artifact jar
         }
     }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
+    repositories {}
 }
