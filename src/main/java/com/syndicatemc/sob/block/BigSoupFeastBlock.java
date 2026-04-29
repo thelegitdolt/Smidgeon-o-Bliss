@@ -7,13 +7,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import vectorwing.farmersdelight.common.block.RoastChickenBlock;
+import vectorwing.farmersdelight.common.block.FeastBlock;
 
-public class BigSoupFeastBlock extends RoastChickenBlock {
+public class BigSoupFeastBlock extends FeastBlock {
     public static final IntegerProperty SERVINGS = IntegerProperty.create("servings", 0, 4);
     protected static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 12.0D, 14.0D);
 

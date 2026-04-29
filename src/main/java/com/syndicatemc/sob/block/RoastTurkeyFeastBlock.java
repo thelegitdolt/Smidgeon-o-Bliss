@@ -11,9 +11,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import vectorwing.farmersdelight.common.block.RoastChickenBlock;
+import vectorwing.farmersdelight.common.block.FeastBlock;
 
-public class RoastTurkeyFeastBlock extends RoastChickenBlock {
+public class RoastTurkeyFeastBlock extends FeastBlock {
     public static final IntegerProperty SERVINGS = IntegerProperty.create("servings", 0, 5);
     protected static final VoxelShape PLATE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 2.0D, 15.0D);
     protected static final VoxelShape MEAL_SHAPE = Shapes.joinUnoptimized(PLATE_SHAPE, Block.box(3.0D, 2.0D, 3.0D, 13.0D, 10.0D, 13.0D), BooleanOp.OR);;

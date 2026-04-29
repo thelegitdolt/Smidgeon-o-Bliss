@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,11 +16,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import vectorwing.farmersdelight.common.block.RoastChickenBlock;
 import umpaz.brewinandchewin.common.registry.BnCItems;
+import vectorwing.farmersdelight.common.block.FeastBlock;
 import vectorwing.farmersdelight.common.utility.TextUtils;
 
-public class RedRumSkullBlock extends RoastChickenBlock {
+public class RedRumSkullBlock extends FeastBlock {
     public static final IntegerProperty SERVINGS = IntegerProperty.create("servings", 0, 4);
     protected static final VoxelShape SHAPE = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D);
 
@@ -48,10 +49,10 @@ public class RedRumSkullBlock extends RoastChickenBlock {
     }
 
     @Override
-    protected InteractionResult takeServing(LevelAccessor level, BlockPos pos, BlockState state, Player player, InteractionHand hand) {
-        int servings = (Integer)state.getValue(this.getServingsProperty());
+    protected InteractionResult takeServing(Level level, BlockPos pos, BlockState state, Player player, InteractionHand hand) {
+        int servings = state.getValue(this.getServingsProperty());
         if (servings == 0) {
-            level.playSound((Player)null, pos, SoundEvents.WOOD_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
+            level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
             level.destroyBlock(pos, true);
             return InteractionResult.SUCCESS;
         } else {

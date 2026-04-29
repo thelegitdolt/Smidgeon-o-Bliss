@@ -1,17 +1,19 @@
 package com.syndicatemc.sob.init;
 
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.syndicatemc.sob.SOB;
 import com.syndicatemc.sob.block.*;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import umpaz.brewinandchewin.common.block.*;
+import umpaz.brewinandchewin.common.block.CheeseWheelBlock;
+import umpaz.brewinandchewin.common.block.UnripeCheeseWheelBlock;
 import vectorwing.farmersdelight.common.block.RiceBaleBlock;
 import vectorwing.farmersdelight.common.block.WildCropBlock;
 
